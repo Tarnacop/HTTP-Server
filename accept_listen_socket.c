@@ -10,6 +10,7 @@
 
 #include "accept_listen_socket.h"
 #include "create_printable_address.h"
+#include "handle_client_socket.h"
 
 int accept_listen_socket(const int tcp6_socket) {
 
@@ -42,8 +43,8 @@ int accept_listen_socket(const int tcp6_socket) {
          */
         printable = create_printable_address(&client_address, buffer, sizeof(buffer));
 
-        printf("%s connected\n", printable);
-        close(tcp6_socket);
+        (void) handle_client_socket(client, printable);
+
         free(printable);
     }
 
