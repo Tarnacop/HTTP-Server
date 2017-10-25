@@ -3,6 +3,6 @@
  */
 #include <netinet/in.h>
 
-char *create_printable_address(const struct sockaddr_in6 *const address,
-                                char *const buffer,
-                                const size_t buffer_size);
+char *create_printable_address(const struct sockaddr_in6 *const,
+                                char *const,
+                                const size_t);

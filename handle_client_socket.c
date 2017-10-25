@@ -3,11 +3,10 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include <memory.h>
+#include <string.h>
 
 #include "handle_client_socket.h"
-
-#define BUFFER_SIZE 1024
+#include "parse_http_request.h"
 
 int handle_client_socket(const int client_socket, const char *const client_identification){
 
@@ -15,6 +14,7 @@ int handle_client_socket(const int client_socket, const char *const client_ident
      * Declaring variables
      * the buffer is used
      */
+    const int BUFFER_SIZE = 1024;
     char buffer[BUFFER_SIZE];
     memset(buffer, '\0', BUFFER_SIZE);
     size_t bytes;
@@ -36,7 +36,10 @@ int handle_client_socket(const int client_socket, const char *const client_ident
     }
 
     buffer[bytes] = '\0';
+
     printf("Here is the message read: %s\n", buffer);
+
+    parse_http_request(buffer, bytes, NULL);
 
     bytes = write(client_socket, buffer, bytes);
 

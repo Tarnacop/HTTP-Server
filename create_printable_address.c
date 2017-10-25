@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <stdio.h>
-#include <memory.h>
+#include <string.h>
 
 #include "create_printable_address.h"
 
