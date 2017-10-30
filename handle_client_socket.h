@@ -2,4 +2,6 @@
  * Created by Alexandru Blinda.
  */
 
-int handle_client_socket(const int, const char *const);
+#include <pthread.h>
+
+int handle_client_socket(const int, pthread_mutex_t*);

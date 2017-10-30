@@ -19,6 +19,4 @@ typedef struct thread_control_block {
 
 } thread_control_block_t;
 
-static void *client_thread(void*);
-
 int accept_listen_socket(const int);

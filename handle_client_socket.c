@@ -4,22 +4,24 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <sys/socket.h>
 
 #include "handle_client_socket.h"
 #include "parse_http_request.h"
 
-int handle_client_socket(const int client_socket, const char *const client_identification){
+int handle_client_socket(const int client_socket, pthread_mutex_t* lock) {
 
     /**
      * Declaring variables
      * the buffer is used
      */
-    const int BUFFER_SIZE = 1024;
+    const int BUFFER_SIZE = 8 * 1024 + 1; /** 8KB+1 to check if the request entity is too large */
     char buffer[BUFFER_SIZE];
     memset(buffer, '\0', BUFFER_SIZE);
     size_t bytes;
 
-    printf("%s connected.\n", client_identification);
+    char* response;
 
     /**
      * Read the specified amount of bytes as long as there is no error (bytes > 0)
@@ -27,6 +29,7 @@ int handle_client_socket(const int client_socket, const char *const client_ident
      * We keep 1 space free to add a terminating null byte \0
      */
 
+    /** First step is getting the Request-Line */
     bytes = read(client_socket, buffer, BUFFER_SIZE - 1);
     if(bytes < 0) {
 
@@ -39,9 +42,9 @@ int handle_client_socket(const int client_socket, const char *const client_ident
 
     printf("Here is the message read: %s\n", buffer);
 
-    parse_http_request(buffer, bytes, NULL);
+    parse_http_request(buffer, bytes, &response, lock);
 
-    bytes = write(client_socket, buffer, bytes);
+    bytes = write(client_socket, response, strlen(response));
 
     if(bytes < 0) {
 
@@ -50,10 +53,9 @@ int handle_client_socket(const int client_socket, const char *const client_ident
         return -1;
     }
 
-    close(client_socket);
+    shutdown(client_socket, SHUT_RD);
 
-    printf("%s disconnected.\n", client_identification);
-
+    free(response);
 
     return 0;
 }

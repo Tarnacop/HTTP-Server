@@ -7,34 +7,18 @@
 #include <pthread.h>
 
 #include "accept_listen_socket.h"
-#include "create_printable_address.h"
 #include "handle_client_socket.h"
 
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 static void *client_thread(void *data) {
 
     thread_control_block_t *tcb_pointer = data;
 
-    /**
-    * buffer is passed to another method to create a printable address
-    * the extra 32 bytes to the buffer are needed for extra words
-    * printable will hold the actual printable string
-    */
-    char buffer[INET6_ADDRSTRLEN + 64];
-    char *printable;
-
-    /**
-     * Create printable address from the client address
-     */
-    printable = create_printable_address( &(tcb_pointer->client_address), buffer, sizeof(buffer));
-
-    (void) handle_client_socket(tcb_pointer->client, printable);
-
-    free(printable);
+    (void) handle_client_socket(tcb_pointer->client, &lock);
 
     free(data);
-
-    pthread_exit(0);
+    pthread_exit(EXIT_SUCCESS);
 }
 
 

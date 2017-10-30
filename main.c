@@ -3,23 +3,30 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "create_listen_socket.h"
 #include "accept_listen_socket.h"
 
-const char *server_name = "SERVER";
+void sig_handler(int);
 
 int main(int argc, char **argv) {
 
     int port_number, tcp6_socket;
     char *end_port_number_string;
 
+    if(signal(SIGPIPE, sig_handler) == SIG_ERR) {
+
+        fprintf(stderr, "ERROR HANDLING SIGTERM\n");
+        exit(EXIT_FAILURE);
+    }
+
     /**
      * The port number to bind to must be passed as an argument when running the server
      */
     if(argc != 2) {
 
-        fprintf(stderr, "%s: You must pass the port as an argument.\n", server_name);
+        fprintf(stderr, "%s: You must pass the port as an argument.\n", argv[0]);
         exit(1);
     }
 
@@ -36,7 +43,7 @@ int main(int argc, char **argv) {
      */
     if(*end_port_number_string != '\0') {
 
-        fprintf(stderr, "%s: %s is not a number!\n", server_name, *argv);
+        fprintf(stderr, "%s: %s is not a number!\n", argv[0], *argv);
         exit(1);
     }
 
@@ -46,7 +53,7 @@ int main(int argc, char **argv) {
      */
     if(port_number < 1024 || port_number > 65535) {
 
-        fprintf(stderr, "%s: %d is not a valid port. A valid port must be between 1024 and 65535.\n", server_name, port_number);
+        fprintf(stderr, "%s: %d is not a valid port. A valid port must be between 1024 and 65535.\n", argv[0], port_number);
         exit(1);
     }
 
@@ -57,16 +64,24 @@ int main(int argc, char **argv) {
     tcp6_socket = create_listen_socket(port_number);
     if(tcp6_socket < 0) {
 
-        fprintf(stderr, "%s: Could not create a listening socket.\n", server_name);
+        fprintf(stderr, "%s: Could not create a listening socket.\n", argv[0]);
         exit(1);
     }
 
     if(accept_listen_socket(tcp6_socket) < 0) {
 
-        fprintf(stderr, "%s: Cannot process listen socket.\n", server_name);
+        fprintf(stderr, "%s: Cannot process listen socket.\n", argv[0]);
         exit(1);
     }
 
 
     exit(0);
 } // END OF main FUNCTION
+
+void sig_handler(int signo) {
+
+    if (signo == SIGPIPE) {
+
+        return;
+    }
+}
